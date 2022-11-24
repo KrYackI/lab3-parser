@@ -8,17 +8,28 @@ template<typename T> class Tstack {
 public:
 	Tstack() : top(-1) {};
 	bool isempty() { return top == -1; }
+	int height() { return top; }
 	void push(T obj)
 	{
 		pMem.push_back(obj);
 		top++;
 	}
-	T pull()
+	T get()
 	{
 		if (isempty()) throw - 1;
-		top--;
-		T tmp = pMem.back();
+		return pMem.back();
+	}
+	void pop()
+	{
+		if (isempty()) throw - 1;
 		pMem.pop_back();
+		top--;
+	}
+	T ppull()
+	{
+		if (isempty()) throw - 1;
+		T tmp = pMem.back();
+		pop();
 		return tmp;
 	}
 };

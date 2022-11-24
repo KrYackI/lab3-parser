@@ -10,9 +10,9 @@ TEST(Tstack, stack1)
 	stack1.push(1);
 	stack1.push(2);
 	stack2 = stack1;
-	stack2.pull();
-	stack2.pull();
-	EXPECT_EQ(3, stack2.pull());
+	stack2.pop();
+	stack2.pop();
+	EXPECT_EQ(3, stack2.get());
 }
 
 TEST(Tqueue, queue1)
@@ -25,7 +25,6 @@ TEST(Tqueue, queue1)
 		queue1.push(2);
 		queue2 = queue1;
 	}
-	queue2.pull();
-	queue2.pull();
-	EXPECT_EQ(2, queue2.pull());
+	queue2.pop();
+	EXPECT_EQ(1, queue2.first());
 }

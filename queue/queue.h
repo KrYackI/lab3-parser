@@ -9,7 +9,7 @@ public:
 	Tqueue(int s) : size(s) { pMem = new T[size]; end = 0; start = next(end); };
 	Tqueue(Tqueue& q) : size(q.size), end(q.end), start(q.start) { delete pMem; pMem = new T[size]; 
 	for (int i = 0; i < size; i++)
-		pMem = p.pMem;
+		pMem = q.pMem;
 	}
 	Tqueue& operator=(Tqueue& q){
 		if (this == &q) return *this;
@@ -30,11 +30,19 @@ public:
 		end = next(end);
 		pMem[end] = obj;
 	}
-	T pull()
+	void pop()
 	{
 		if (isempty()) throw - 1;
-		T tmp = pMem[start];
-			start++;
-		return tmp;
+		start = next(start);
+	}
+	//T last()
+	//{
+	//	if (isempty()) throw - 1;
+	//	return pMem[end];
+	//}
+	T first()
+	{
+		if (isempty()) throw - 1;
+		return pMem[start];
 	}
 };
