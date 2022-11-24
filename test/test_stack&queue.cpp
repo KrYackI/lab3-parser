@@ -17,14 +17,14 @@ TEST(Tstack, stack1)
 
 TEST(Tqueue, queue1)
 {
-	Tqueue<int> queue2(10);
+	Tqueue<int> queue2;
 	if (true) {
-		Tqueue<int> queue1(10);
+		Tqueue<int> queue1;
 		queue1.push(3);
 		queue1.push(1);
 		queue1.push(2);
 		queue2 = queue1;
 	}
 	queue2.pop();
-	EXPECT_EQ(1, queue2.first());
+	EXPECT_EQ(1, queue2.front());
 }

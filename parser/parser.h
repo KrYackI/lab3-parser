@@ -7,7 +7,12 @@
 //базовый класс rool, три метода: перейти, чек и действие
 //сделать отдельными классами лексический, синтаксический анализы и транслятор
 
-//#define queue Tqueue
+#define queue Tqueue
+#ifdef queue
+#define empty isempty
+
+#endif
+
 #define stack Tstack
 
 using namespace std;
@@ -109,6 +114,7 @@ void print(queue <Lexema> t) {
 
 class LexAnalysis {
 	queue<Lexema> problem;
+public:
 	queue <Lexema> lex(string input) 
 	{
 		queue<Lexema>res;
@@ -166,9 +172,9 @@ class LexAnalysis {
 		}
 		return res;
 	}
-public:
-	LexAnalysis(string s) : problem(lex(s)) {};
-	queue<Lexema> getproblem() { return problem; }
+
+	LexAnalysis(string s = "") : problem(lex(s)) {};
+	queue<Lexema>& getproblem() { return problem; }
 };
 
 //(123 + 10 * 2 - 1) / 20
@@ -278,10 +284,10 @@ int str_to_int(string s)
 	return res;
 }
 
-class calculator
+class Calculator
 {
 public:
-	calculator() {};
+	Calculator() {};
 	int calculate(queue<Lexema> p)
 	{
 		stack<int> st;
@@ -310,4 +316,26 @@ public:
 		}
 		return st.get();
 	}
+};
+
+class parser {
+	LexAnalysis Lex;
+	SyntaxAnalysis St;
+	Calculator calc;
+	string problem;
+	queue<Lexema> straight_func;
+	queue<Lexema> reverse_func;
+	int answer;
+public:
+	parser(string s = "") : problem(s), answer(NAN) {};
+	void setProblem(string s) { problem = s; }
+	void calculate_all()
+	{
+		straight_func = Lex.lex(problem);
+		reverse_func = St.rev(straight_func);
+		answer = calc.calculate(reverse_func);
+	}
+	string getProblem() { return problem; }
+	int getAnswer() { if (answer == NAN) calculate_all(); return answer; }
+
 };
