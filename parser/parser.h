@@ -3,6 +3,7 @@
 #include "stack.h" // сделать свой
 #include "queue.h" // сделать свой
 #include <queue>
+#include <stack>
 //вместо switch можно сделать список(массив) правил
 //базовый класс rool, три метода: перейти, чек и действие
 //сделать отдельными классами лексический, синтаксический анализы и транслятор
@@ -45,6 +46,7 @@ public:
 		out << "}";
 		return out;
 	}
+	~Lexema() {}
 };
 
 queue <Lexema> lex(string input) {
@@ -179,6 +181,8 @@ public:
 
 //(123 + 10 * 2 - 1) / 20
 //( - * * - - - * -) * - (* - - * * -)()()()
+// -5 == (0 - 5)
+// 6 - 5 == 6 + (0 - 5) 
 
 class exc {
 	string str;
@@ -205,7 +209,7 @@ class SyntaxAnalysis {
 			flag--;
 			if (flag < 0) 
 			{
-				throw new exc("incorrect ')' operation before '(' in pos ", iter);
+				throw exc("incorrect ')' operation before '(' in pos ", iter);
 			}
 		}
 		iter++;
@@ -214,7 +218,7 @@ class SyntaxAnalysis {
 			if (prev.getType() == p.front().getType()) 
 				if (prev.getStr() != "(" && prev.getStr() != ")" && p.front().getStr() != "(" && p.front().getStr() != ")")
 				{
-				throw new exc("expected diff type of lexem in pos ", iter);
+				throw exc("expected diff type of lexem in pos ", iter);
 				}
 			prev = p.front();
 			p.pop();
@@ -224,14 +228,14 @@ class SyntaxAnalysis {
 				flag--;
 				if (flag < 0)
 				{
-					throw new exc("incorrect ')' operation before '(' in pos ", iter);
+					throw exc("incorrect ')' operation before '(' in pos ", iter);
 				}
 			}
 			iter++;
 		}
 		if (flag) 
 		{
-			throw new exc("number of ')' not equal to ')' ", -1);
+			throw exc("number of ')' not equal to ')' ", -1);
 		}
 	}
 

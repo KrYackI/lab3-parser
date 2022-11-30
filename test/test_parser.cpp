@@ -9,6 +9,8 @@ TEST(parser, rightbasic)
 	lex_res = lex(str);
 	print(lex_res);
 	SyntaxAnalysis s;
+	cout << endl;
+	print(s.rev(lex_res));
 	Calculator c;
 	EXPECT_EQ(c.calculate(s.rev(lex_res)), 63);
 }

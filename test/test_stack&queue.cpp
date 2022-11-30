@@ -15,6 +15,13 @@ TEST(Tstack, stack1)
 	EXPECT_EQ(3, stack2.get());
 }
 
+TEST(Tstack, stack12)
+{
+		Tstack<int> stack2;
+		Tstack<int> stack1(stack2);
+		ASSERT_NO_THROW();
+}
+
 TEST(Tqueue, queue1)
 {
 	Tqueue<int> queue2;
