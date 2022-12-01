@@ -18,11 +18,10 @@ set(MP2_LIBRARY "${PROJECT_NAME}")
 set(MP2_TESTS   "test_${PROJECT_NAME}")
 set(MP2_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-include_directories(parser stack queue gtest)
+include_directories(parser stack_queue gtest)
 
 # BUILD
-add_subdirectory(stack)
-add_subdirectory(queue)
+add_subdirectory(stack_queue)
 add_subdirectory(parser)
 add_subdirectory(gtest)
 add_subdirectory(test)
