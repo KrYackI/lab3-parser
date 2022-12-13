@@ -2,8 +2,7 @@
 #include <string>
 #include <iostream>
 #include "Stack.h" 
-#include <Queue>
-#include <Stack>
+
 
 using namespace std;
 
@@ -17,12 +16,33 @@ class Lexema {
 	TypeElement type;
 public:
 	Lexema(string _str = " ", TypeElement _type = Value) : str(_str), type(_type) {};
-	string getStr() { return str; }
-	TypeElement getType() { return type; }
-	int priority()
+
+	bool operator==(const Lexema& l) const
+	{
+		return (str == l.str && type == l.type);
+	}
+
+	bool operator!=(const Lexema& l) const
+	{
+		return !(str == l.str && type == l.type);
+	}
+	
+
+	string getStr() 
+	{ 
+		return str;
+	}
+	TypeElement getType()
+	{
+		return type; 
+	}
+
+	int priority() 
 	{
 		string op = "()+-*/";
-		return op.find(str) / 2;
+		if (type==Value)
+			throw "exeption";
+		return op.find(str) / 2; //номер операции в строке op делить на 2
 	}
 	friend ostream& operator << (ostream& out, Lexema& p) {
 		out << "{" << p.str << ", ";
@@ -35,65 +55,9 @@ public:
 		out << "}";
 		return out;
 	}
-	~Lexema() {}
 };
 
-Queue <Lexema> lex(string input) {
-	Queue<Lexema>res;
-	input += ' ';
-	int i = 0;
-	string tmp = "";
-	string op = "+-*/()";
-	string sep = " \n\t";
-	int state = 0;
-	for (i = 0; i < input.size(); i++) {
-		char c = input[i];
-		int fres;
-		switch (state)
-		{
-		case 0: 
-			if (c >= '0' && c <= '9') {
-				tmp = c;
-				state = 1;
-				break;
-			}
-			fres = op.find(c);
-			if (fres >= 0) {
-				tmp = c;
-				Lexema l(tmp, Operation);
-				res.Push(l);
-				state = 0;
-				break;
-			}
-			break;
-		case 1: 
-			if (c >= '0' && c <= '9') {
-				tmp += c;
-				state = 1;
-				break;
-			}
-			fres = op.find(c);
-			if (fres >= 0) {
-				Lexema l1(tmp, Value);
-				res.Push(l1);
-				tmp = c;
-				Lexema l2(tmp, Operation);
-				res.Push(l2);
-				state = 0;
-				break;
-			}
-			fres = sep.find(c);
-			if (fres >= 0) {
-				Lexema l(tmp, Value);
-				res.Push(l);
-				state = 0;
-				break;
-			}
-			break;
-		}
-	}
-	return res;
-}
+
 
 void print(Queue <Lexema> t) {
 	while (!t.IsEmpty()) {
@@ -103,30 +67,29 @@ void print(Queue <Lexema> t) {
 	cout << endl;
 }
 
-class LexAnalysis {
+class LexAnalysis { // строку преобразовать в очередь из лексем
 	Queue<Lexema> problem;
 public:
-	Queue <Lexema> lex(string input)
-	{
+	Queue <Lexema> lex(string input) {
 		Queue<Lexema>res;
 		input += ' ';
 		int i = 0;
 		string tmp = "";
 		string op = "+-*/()";
 		string sep = " \n\t";
-		int state = 0;
+		int state = 0;// если state 0 , то на прошлом шаге не было число, если 1-то записывали числло на прошлом шаге.
 		for (i = 0; i < input.size(); i++) {
 			char c = input[i];
 			int fres;
 			switch (state)
 			{
-			case 0: 
+			case 0:
 				if (c >= '0' && c <= '9') {
 					tmp = c;
 					state = 1;
 					break;
 				}
-				fres = op.find(c);
+				fres = op.find(c);// содержитс€ ли с в строке op   // ¬ќ«¬–јўј≈“ -1 ≈—Ћ» с не входит в op
 				if (fres >= 0) {
 					tmp = c;
 					Lexema l(tmp, Operation);
@@ -135,7 +98,7 @@ public:
 					break;
 				}
 				break;
-			case 1: 
+			case 1:
 				if (c >= '0' && c <= '9') {
 					tmp += c;
 					state = 1;
@@ -165,12 +128,16 @@ public:
 	}
 
 	LexAnalysis(string s = "") : problem(lex(s)) {};
-	Queue<Lexema>& getproblem() { return problem; }
+	Queue<Lexema>& getproblem() 
+	{ 
+		return problem; 
+	}
+
 };
 
 
 
-class exc {
+class exc { //показывает ошибку и на какой позиции
 	string str;
 	int index;
 public:
@@ -182,7 +149,8 @@ public:
 	}
 };
 
-class SyntaxAnalysis {
+class SyntaxAnalysis 
+{
 
 	void CorrectCheck(Queue<Lexema> p) {
 		int flag = 0;
@@ -191,17 +159,11 @@ class SyntaxAnalysis {
 		p.Pop();
 		if (prev.getStr() == "(") flag++;
 		if (prev.getStr() == ")")
-		{
-			flag--;
-			if (flag < 0)
-			{
 				throw exc("incorrect ')' operation before '(' in pos ", iter);
-			}
-		}
 		iter++;
 		while (!p.IsEmpty())
 		{
-			if (prev.getType() == p.Top().getType())
+			if (prev.getType() == p.Top().getType())// проверка на 2 подр€д одинаковые лексемы
 				if (prev.getStr() != "(" && prev.getStr() != ")" && p.Top().getStr() != "(" && p.Top().getStr() != ")")
 				{
 					throw exc("expected diff type of lexem in pos ", iter);
@@ -219,15 +181,16 @@ class SyntaxAnalysis {
 			}
 			iter++;
 		}
+
 		if (flag)
 		{
-			throw exc("number of ')' not equal to ')' ", -1);
+			throw exc("number of '(' not equal to ')' ", -1);
 		}
 	}
 
 public:
 	SyntaxAnalysis() {};
-	Queue<Lexema> rev(Queue<Lexema> clone)
+	Queue<Lexema> rev(Queue<Lexema> clone)// из обычной в постфиксную
 	{
 		try { CorrectCheck(clone); }
 		catch (exc e) { cout << e; throw - 1; }
@@ -318,14 +281,20 @@ class parser {
 	int answer;
 public:
 	parser(string s = "") : problem(s), answer(NAN) {};
-	void setProblem(string s) { problem = s; }
+	void setProblem(string s) { problem = s; answer = NAN; }
 	void calculate_all()
 	{
 		straight_func = Lex.lex(problem);
 		reverse_func = St.rev(straight_func);
 		answer = calc.calculate(reverse_func);
 	}
-	string getProblem() { return problem; }
-	int getAnswer() { if (answer == NAN) calculate_all(); return answer; }
+	string getProblem() 
+	{
+		return problem;
+	}
+	int getAnswer() 
+	{ 
+		if (answer == NAN) calculate_all(); return answer; 
+	}
 
 };

@@ -121,3 +121,14 @@ TEST(Queue, operator_copy_queue_is_correctly)
 	EXPECT_EQ(q1.Get_size(), q2.Get_size());
 
 }
+
+TEST(Queue, operator_marka)
+{
+	Queue<int> q1;
+	q1.Push(2);
+	q1.Push(1);
+	Queue<int> q2(q1);
+	EXPECT_EQ(q2, q1);
+	
+
+}

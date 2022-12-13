@@ -154,6 +154,17 @@ public:
 		return*this;
 	}
 
+	bool operator==(const Queue& q) const
+	{
+		if (size != q.size)
+			return 0;
+		for (size_t i = head; i != (tail + 1) % capacity; i = (i + 1) % capacity)
+			if (pMem[i] != q.pMem[i])
+				return 0;
+		return 1;
+	}
+
+
 	void Push(T elem)
 	{
 		if (tail == head && size != 0)
