@@ -8,7 +8,9 @@ using namespace std;
 
 enum TypeElement {
 	Operation,
-	Value
+	UnarOp,
+	Value,
+	dValue
 };
 
 class Lexema {
@@ -42,6 +44,8 @@ public:
 		string op = "()+-*/";
 		if (type==Value)
 			throw "exeption";
+		if (type == UnarOp)
+			return 4;
 		return op.find(str) / 2; //номер операции в строке op делить на 2
 	}
 	friend ostream& operator << (ostream& out, Lexema& p) {
@@ -76,6 +80,7 @@ public:
 		int i = 0;
 		string tmp = "";
 		string op = "+-*/()";
+		//string uop = "-";
 		string sep = " \n\t";
 		int state = 0;// если state 0 , то на прошлом шаге не было число, если 1-то записывали числло на прошлом шаге.
 		for (i = 0; i < input.size(); i++) {
@@ -89,14 +94,48 @@ public:
 					state = 1;
 					break;
 				}
+				if (c == '.') {
+					tmp = c;
+					state = 3;
+					break;
+				}
 				fres = op.find(c);// содержитс€ ли с в строке op   // ¬ќ«¬–јўј≈“ -1 ≈—Ћ» с не входит в op
 				if (fres >= 0) {
+					tmp = c;
+					//fres = uop.find(c);
+					//if (res.IsEmpty() && fres >= 0)
+					//{
+					//	Lexema l(tmp, UnarOp);
+					//	res.Push(l);
+					//}
+					//else
+					//{
+						Lexema l(tmp, Operation);
+						res.Push(l);
+					//}
+					state = 2;
+					break;
+				}
+				//fres = sep.find(c);
+				//if (fres >= 0) {
+				//	Lexema l(tmp, Value);
+				//	res.Push(l);
+				//	state = 0;
+				//	break;
+				//}
+				fres = sep.find(c);
+				if (fres >= 0) {
+					tmp = "";
+					break;
+				}
+				if (c == ')') {
 					tmp = c;
 					Lexema l(tmp, Operation);
 					res.Push(l);
 					state = 0;
 					break;
 				}
+				throw "unexpected lex";
 				break;
 			case 1:
 				if (c >= '0' && c <= '9') {
@@ -111,7 +150,7 @@ public:
 					tmp = c;
 					Lexema l2(tmp, Operation);
 					res.Push(l2);
-					state = 0;
+					state = 2;
 					break;
 				}
 				fres = sep.find(c);
@@ -121,8 +160,87 @@ public:
 					state = 0;
 					break;
 				}
+				if (c == '.') {
+					tmp += c;
+					state = 3;
+					break;
+				}
+				throw "unexpected lex";
+			case 2:
+				if (c >= '0' && c <= '9') {
+					tmp = c;
+					state = 1;
+					break;
+				}
+				if (c == '.') {
+					tmp = c;
+					state = 3;
+					break;
+				}
+				//fres = uop.find(c);
+				//if (fres >= 0) {
+				//	tmp = c;
+				//	Lexema l(tmp, UnarOp);
+				//	res.Push(l);
+				//	break;
+				//}
+				fres = op.find(c);
+				if (fres >= 0) {
+					tmp = c;
+					Lexema l(tmp, Operation);
+					res.Push(l);
+					if (c == ')') state = 0;
+					else state = 2;
+					break;
+				}
+				fres = sep.find(c);
+				if (fres >= 0) {
+					tmp = "";
+					break;
+				}
+				throw "unexpected lex";
+			case 3:
+				if (c >= '0' && c <= '9') {
+					tmp += c;
+					state = 4;
+					break;
+				}
+				throw "unexpected lex";
+			case 4:
+				if (c >= '0' && c <= '9') {
+					tmp += c;
+					break;
+				}
+				if (c == ')') {
+					Lexema l1(tmp, dValue);
+					res.Push(l1);
+					tmp = c;
+					Lexema l2(tmp, Operation);
+					res.Push(l2);
+					state = 0;
+					break;
+				}
+				fres = op.find(c);
+				if (fres >= 0) {
+					Lexema l1(tmp, dValue);
+					res.Push(l1);
+					tmp = c;
+					Lexema l2(tmp, Operation);
+					res.Push(l2);
+					state = 2;
+					break;
+				}
+				fres = sep.find(c);
+				if (fres >= 0) {
+					Lexema l(tmp, dValue);
+					res.Push(l);
+					state = 0;
+					break;
+				}
+			default:
 				break;
 			}
+
 		}
 		return res;
 	}
@@ -149,7 +267,7 @@ public:
 	}
 };
 
-class SyntaxAnalysis 
+class SyntaxAnalysis
 {
 
 	void CorrectCheck(Queue<Lexema> p) {
@@ -159,7 +277,7 @@ class SyntaxAnalysis
 		p.Pop();
 		if (prev.getStr() == "(") flag++;
 		if (prev.getStr() == ")")
-				throw exc("incorrect ')' operation before '(' in pos ", iter);
+			throw exc("incorrect ')' operation before '(' in pos ", iter);
 		iter++;
 		while (!p.IsEmpty())
 		{
@@ -197,104 +315,143 @@ public:
 
 		Queue<Lexema> reverse;
 		Stack<Lexema> st;
-		while (!clone.IsEmpty())
-		{
-			if (clone.Top().getType() == Value)
+			while (!clone.IsEmpty())
 			{
-				reverse.Push(clone.Top());
-			}
-			if (clone.Top().getType() == Operation)
-			{
-				if (clone.Top().getStr() == "(") st.Push(clone.Top());
-				else if (clone.Top().getStr() == ")")
+				if (clone.Top().getType() == Value || clone.Top().getType() == dValue)
 				{
-					while (st.Top().priority() != clone.Top().priority())
-						reverse.Push(st.Pop());
-					st.Pop();
+					reverse.Push(clone.Top());
 				}
-				else
+				if (clone.Top().getType() == Operation)
 				{
-					while ((!st.IsEmpty()) && (st.Top().priority() >= clone.Top().priority()))
+					if (clone.Top().getStr() == "(") st.Push(clone.Top());
+					else if (clone.Top().getStr() == ")")
 					{
-						reverse.Push(st.Pop());
+						while (st.Top().priority() != clone.Top().priority())
+							reverse.Push(st.Pop());
+						st.Pop();
 					}
-					st.Push(clone.Top());
+					else
+					{
+						while ((!st.IsEmpty()) && (st.Top().priority() >= clone.Top().priority()))
+						{
+							reverse.Push(st.Pop());
+						}
+						st.Push(clone.Top());
+					}
 				}
+				clone.Pop();
 			}
-			clone.Pop();
+			while (!st.IsEmpty())
+				reverse.Push(st.Pop());
+			return reverse;
 		}
-		while (!st.IsEmpty())
-			reverse.Push(st.Pop());
-		return reverse;
-	}
-};
+	//	Lexema lex, stLex;
+	//	while (!clone.IsEmpty()) {
+	//		lex = clone.Top();
 
-int str_to_int(string s)
-{
-	int res = 0;
-	for (int i = 0; i < s.length(); i++)
-		res = res * 10 + s[i] - '0';
-	return res;
-}
+	//		if (lex.getType() == Value || lex.getType() == dValue) {
+	//			reverse.Push(lex);
+	//		}
+	//		if (lex.getType() == Operation) {
+	//			if (lex.getStr() != "(")
+	//				while (!st.IsEmpty()) {
+	//					stLex = st.Top(); st.Pop();
+	//					if ((lex.priority() <= stLex.priority()))
+	//						reverse.Push(stLex);
+	//					else {
+	//						if (!(stLex.getStr() == "(" && lex.getStr() == ")"))
+	//							st.Push(stLex);
+	//						break;
+	//					}
+	//				}
+	//			if (lex.getStr() != ")")
+	//				st.Push(lex);
+	//		}
+	//		clone.Pop();
+	//	}
+	//	while (!st.IsEmpty()) {
+	//		stLex = st.Top(); st.Pop();
+	//		reverse.Push(stLex);
+	//	}
+	//	return reverse;
+	//}
+	};
 
-class Calculator
-{
-public:
-	Calculator() {};
-	int calculate(Queue<Lexema> p)
+	int str_to_int(string s)
 	{
-		Stack<int> st;
-		while (!p.IsEmpty())
+		int res = 0;
+		for (int i = 0; i < s.length(); i++)
+			res = res * 10 + s[i] - '0';
+		return res;
+	}
+
+	class Calculator
+	{
+	public:
+		Calculator() {};
+		double calculate(Queue<Lexema> p)
 		{
-			if (p.Top().getType() == Value)
-				st.Push(str_to_int(p.Top().getStr()));
-			if (p.Top().getType() == Operation)
+			Stack<double> st;
+			while (!p.IsEmpty())
 			{
-				int r = st.Pop();
-				int l = st.Pop();
-				switch (p.Top().getStr()[0])
+				if (p.Top().getType() == Value)
+					st.Push(stod(p.Top().getStr()));
+				if (p.Top().getType() == dValue)
+					st.Push(stod(p.Top().getStr()));
+				//if (p.Top().getType() == UnarOp)
+				//{
+				//	auto r = st.Pop();
+				//	switch (p.Top().getStr()[0])
+				//	{
+				//	case '-': st.Push(0 - r);
+				//}
+				if (p.Top().getType() == Operation)
 				{
-				case '+': st.Push(l + r);
-					break;
-				case '-': st.Push(l - r);
-					break;
-				case '*': st.Push(l * r);
-					break;
-				case '/': if (r == 0) throw "divider is 0";
-					st.Push(l / r);
-					break;
+					double r = st.Pop();
+					double l = st.Pop();
+					switch (p.Top().getStr()[0])
+					{
+					case '+': st.Push(l + r);
+						break;
+					case '-': st.Push(l - r);
+						break;
+					case '*': st.Push(l * r);
+						break;
+					case '/': if (r == 0) throw "divider is 0";
+						st.Push(l / r);
+						break;
+					}
 				}
+				p.Pop();
 			}
-			p.Pop();
+			return st.Top();
 		}
-		return st.Top();
-	}
-};
+	};
 
-class parser {
-	LexAnalysis Lex;
-	SyntaxAnalysis St;
-	Calculator calc;
-	string problem;
-	Queue<Lexema> straight_func;
-	Queue<Lexema> reverse_func;
-	int answer;
-public:
-	parser(string s = "") : problem(s), answer(NAN) {};
-	void setProblem(string s) { problem = s; answer = NAN; }
-	void calculate_all()
-	{
-		straight_func = Lex.lex(problem);
-		reverse_func = St.rev(straight_func);
-		answer = calc.calculate(reverse_func);
-	}
-	string getProblem() 
-	{
-		return problem;
-	}
-	int getAnswer() 
-	{ 
-		if (answer == NAN) calculate_all(); return answer; 
-	}
+	class parser {
+		LexAnalysis Lex;
+		SyntaxAnalysis St;
+		Calculator calc;
+		string problem;
+		Queue<Lexema> straight_func;
+		Queue<Lexema> reverse_func;
+		int answer;
+	public:
+		parser(string s = "") : problem(s), answer(NAN) {};
+		void setProblem(string s) { problem = s; answer = NAN; }
+		void calculate_all()
+		{
+			straight_func = Lex.lex(problem);
+			reverse_func = St.rev(straight_func);
+			answer = calc.calculate(reverse_func);
+		}
+		string getProblem()
+		{
+			return problem;
+		}
+		double getAnswer()
+		{
+			if (answer == NAN) calculate_all(); return answer;
+		}
 
-};
+	};
