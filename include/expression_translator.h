@@ -78,6 +78,7 @@ public:
 		Queue<Lexema>res;
 		input += ' ';
 		int i = 0;
+		int flag = 0;
 		string tmp = "";
 		string op = "+-*/()";
 		//string uop = "-";
@@ -102,17 +103,26 @@ public:
 				fres = op.find(c);// ñîäåðæèòñÿ ëè ñ â ñòðîêå op   // ÂÎÇÂÐÀÙÀÅÒ -1 ÅÑËÈ ñ íå âõîäèò â op
 				if (fres >= 0) {
 					tmp = c;
-					//fres = uop.find(c);
-					//if (res.IsEmpty() && fres >= 0)
-					//{
-					//	Lexema l(tmp, UnarOp);
-					//	res.Push(l);
-					//}
-					//else
-					//{
+
+					if ( c == '-')
+					{
+						flag = 1;
+						if (!res.IsEmpty()) {
+							Lexema l("+", Operation);
+							res.Push(l);
+						}
+						Lexema l1("(", Operation);
+						res.Push(l1);
+						Lexema l2("0", Value);
+						res.Push(l2);
+						Lexema l3("-", Operation);
+						res.Push(l3);
+					}
+					else
+					{
 						Lexema l(tmp, Operation);
 						res.Push(l);
-					//}
+					}
 					state = 2;
 					break;
 				}
@@ -145,11 +155,32 @@ public:
 				}
 				fres = op.find(c);
 				if (fres >= 0) {
-					Lexema l1(tmp, Value);
-					res.Push(l1);
+					Lexema l(tmp, Value);
+					res.Push(l);
+					if (flag)
+					{
+						Lexema l69(")", Operation);
+						res.Push(l69);
+						flag = 0;
+					}
 					tmp = c;
-					Lexema l2(tmp, Operation);
-					res.Push(l2);
+					if (c == '-')
+					{
+						flag = 1;
+						Lexema l0("+", Operation);
+						res.Push(l0);
+						Lexema l1("(", Operation);
+						res.Push(l1);
+						Lexema l2("0", Value);
+						res.Push(l2);
+						Lexema l3("-", Operation);
+						res.Push(l3);
+					}
+					else
+					{
+						Lexema l0(tmp, Operation);
+						res.Push(l0);
+					}
 					state = 2;
 					break;
 				}
@@ -157,6 +188,12 @@ public:
 				if (fres >= 0) {
 					Lexema l(tmp, Value);
 					res.Push(l);
+					if (flag)
+					{
+						Lexema l69(")", Operation);
+						res.Push(l69);
+						flag = 0;
+					}
 					state = 0;
 					break;
 				}
@@ -187,10 +224,24 @@ public:
 				fres = op.find(c);
 				if (fres >= 0) {
 					tmp = c;
-					Lexema l(tmp, Operation);
-					res.Push(l);
+					if (c == '-')
+					{
+						flag = 1;
+						Lexema l1("(", Operation);
+						res.Push(l1);
+						Lexema l2("0", Value);
+						res.Push(l2);
+						Lexema l3("-", Operation);
+						res.Push(l3);
+					}
+					else
+					{
+						Lexema l0(tmp, Operation);
+						res.Push(l0);
+					}
 					if (c == ')') state = 0;
-					else state = 2;
+					else 
+						state = 2;
 					break;
 				}
 				fres = sep.find(c);
@@ -214,6 +265,12 @@ public:
 				if (c == ')') {
 					Lexema l1(tmp, dValue);
 					res.Push(l1);
+					if (flag)
+					{
+						Lexema l69(")", Operation);
+						res.Push(l69);
+						flag = 0;
+					}
 					tmp = c;
 					Lexema l2(tmp, Operation);
 					res.Push(l2);
@@ -224,9 +281,30 @@ public:
 				if (fres >= 0) {
 					Lexema l1(tmp, dValue);
 					res.Push(l1);
+					if (flag)
+					{
+						Lexema l69(")", Operation);
+						res.Push(l69);
+						flag = 0;
+					}
 					tmp = c;
-					Lexema l2(tmp, Operation);
-					res.Push(l2);
+					if (c == '-')
+					{
+						flag = 1;
+						Lexema l0("+", Operation);
+						res.Push(l0);
+						Lexema l1("(", Operation);
+						res.Push(l1);
+						Lexema l2("0", Value);
+						res.Push(l2);
+						Lexema l3("-", Operation);
+						res.Push(l3);
+					}
+					else
+					{
+						Lexema l0(tmp, Operation);
+						res.Push(l0);
+					}
 					state = 2;
 					break;
 				}
@@ -234,6 +312,12 @@ public:
 				if (fres >= 0) {
 					Lexema l(tmp, dValue);
 					res.Push(l);
+					if (flag)
+					{
+						Lexema l69(")", Operation);
+						res.Push(l69);
+						flag = 0;
+					}
 					state = 0;
 					break;
 				}

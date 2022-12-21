@@ -129,7 +129,22 @@ TEST(parser, rightbasicd)
 	cout << endl;
 	print(s.rev(lex_res));
 	Calculator c;
-	EXPECT_EQ(c.calculate(s.rev(lex_res)), 63.5);
+	EXPECT_EQ(c.calculate(s.rev(lex_res)), 63.8);
+}
+
+TEST(parser, rightbasicd0)
+{
+	string str = "-3.5 + ( -110.9 -10.4)/ -50 *	\t	-30.0 \n";
+	cout << str;
+	Queue <Lexema> lex_res;
+	LexAnalysis l;
+	lex_res = l.lex(str);
+	print(lex_res);
+	SyntaxAnalysis s;
+	cout << endl;
+	print(s.rev(lex_res));
+	Calculator c;
+	EXPECT_EQ(c.calculate(s.rev(lex_res)), -76.28);
 }
 
 TEST(parser, syntexep1)
