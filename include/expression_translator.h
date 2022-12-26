@@ -519,15 +519,17 @@ public:
 		string problem;
 		Queue<Lexema> straight_func;
 		Queue<Lexema> reverse_func;
-		int answer;
+		double answer;
+		bool isans;
 	public:
-		parser(string s = "") : problem(s), answer(NAN) {};
-		void setProblem(string s) { problem = s; answer = NAN; }
+		parser(string s = "") : problem(s), answer(NAN), isans(0) {};
+		void setProblem(string s) { problem = s; answer = NAN; isans = 0; }
 		void calculate_all()
 		{
 			straight_func = Lex.lex(problem);
 			reverse_func = St.rev(straight_func);
 			answer = calc.calculate(reverse_func);
+			isans = 1;
 		}
 		string getProblem()
 		{
@@ -535,7 +537,7 @@ public:
 		}
 		double getAnswer()
 		{
-			if (answer == NAN) calculate_all(); return answer;
+			if (!isans) calculate_all(); return answer;
 		}
 
 	};

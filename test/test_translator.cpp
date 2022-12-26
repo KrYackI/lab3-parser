@@ -132,9 +132,25 @@ TEST(parser, rightbasicd)
 	EXPECT_EQ(c.calculate(s.rev(lex_res)), 63.8);
 }
 
-TEST(parser, rightbasicd0)
+TEST(parser, rightbasicd_negative)
 {
 	string str = "-3.5 + ( -110.9 -10.4)/ -50 *	\t	-30.0 \n";
+	cout << str;
+	//Queue <Lexema> lex_res;
+	//LexAnalysis l;
+	//lex_res = l.lex(str);
+	//print(lex_res);
+	//SyntaxAnalysis s;
+	//cout << endl;
+	//print(s.rev(lex_res));
+	//Calculator c;
+	parser p(str);
+	EXPECT_EQ(p.getAnswer(), -76.28);
+}
+
+TEST(parser, rightbasicd_negative2)
+{
+	string str = "-1 --2 \n";
 	cout << str;
 	Queue <Lexema> lex_res;
 	LexAnalysis l;
@@ -144,7 +160,8 @@ TEST(parser, rightbasicd0)
 	cout << endl;
 	print(s.rev(lex_res));
 	Calculator c;
-	EXPECT_EQ(c.calculate(s.rev(lex_res)), -76.28);
+	parser p(str);
+	ASSERT_NO_THROW(p.getAnswer());
 }
 
 TEST(parser, syntexep1)
